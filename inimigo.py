@@ -32,10 +32,10 @@ class Inimigo(object.Object):
             self.y += self.vspd
             self.scale -= .005
 
-    def draw(self, screen, xoff, yoff):
+    def draw(self, screen, xoff, yoff, cam_zoom):
 
-        sprite = pygame.transform.scale(self.sprites[self.current_sprite],(max(self.get_width() * self.scale, 0), max(self.get_height() * self.scale, 0)))
-        screen.blit(sprite, (self.x + xoff - self.get_width()*self.scale / 2, self.y + yoff - self.get_height()*self.scale / 2))
+        sprite = pygame.transform.scale(self.sprites[self.current_sprite],(max(self.get_width() * cam_zoom * self.scale, 0), max(self.get_height() * cam_zoom * self.scale, 0)))
+        screen.blit(sprite, (self.x + xoff - self.get_width()*self.scale*cam_zoom / 2, self.y + yoff - self.get_height()*self.scale*cam_zoom / 2 + cam_zoom * 30))
             
     def die(self):
         self.current_sprite = 2

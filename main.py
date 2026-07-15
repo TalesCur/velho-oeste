@@ -1,6 +1,7 @@
 import pygame
 from inimigo import Inimigo
 from warning import Warning
+from functions import lerp
 import random
 
 pygame.init()
@@ -56,6 +57,8 @@ game_state = "game"
 
 cam_x = 0
 cam_y = 0
+cam_zoom = 1
+cam_zoom_targ = 1
 shake = 0
 
 dt = 1
@@ -68,9 +71,9 @@ inimigo.y = 1200
 
 global inimigo_timer
 inimigo_timer = random.randint(30, 60)
-
+                                                     
 global pontos
-pontos = 10
+pontos = 0
 
 global arma
 arma = False
@@ -89,7 +92,7 @@ tema.play()
 def ini(f):
 
     global start
-    start = round(random.randint(120, 180) / (1+pontos*.02))
+    start = round(random.randint(120, 180) / (1+f*.25))
 
     global arma
     arma = False
@@ -119,9 +122,9 @@ def ini(f):
     reset_timer = 120
 
     global inimigo_timer
-    inimigo_timer = random.randint(60, 100) / (1+pontos*.02)
+    inimigo_timer = random.randint(60, 100) / (1+f*.15)
 
-ini(fase)
+ini(pontos)
 
 while running:
 
@@ -132,27 +135,32 @@ while running:
 
     screen.fill((0, 0, 0))
 
+    cam_zoom = lerp(cam_zoom, cam_zoom_targ, .1)
     gun_frame+=.1
 
-    screen.blit(bg, (round(0+cam_x), round(-100+cam_y)))
+    sprite_bg = pygame.transform.scale(bg, (bg.get_width()*cam_zoom, bg.get_height()*cam_zoom))
+    screen.blit(sprite_bg, (round(640-sprite_bg.get_width()*.5+cam_x), round(288-sprite_bg.get_height()*.5+cam_y)))
     cam_x = random.uniform(-shake, shake)
     cam_y = random.uniform(-shake, shake)
     shake *= .9
 
     if not _set:
         
-        if start == round(start_start/2):
 
+        if start == round(start_start/2):
+            
+            cam_zoom_targ += .1
             ready_sound.play()
             warning = Warning(0)
-        elif start == 10:
+        elif start == 1:
             
             if random.randint(0, 1) == 1:
                 
+                cam_zoom_targ += .1
                 ready_sound.play()
                 warning = Warning(1)
                 _set = True
-                start = round(random.randint(50, 100) / (1+pontos*.02))
+                start = round(random.randint(50, 100) / (1+pontos*.1))
 
             else:
                 
@@ -160,7 +168,7 @@ while running:
                 warning = Warning(2)
                 _set = False
     else:
-
+        
         if start == 10:
 
             ready_sound.play()
@@ -170,7 +178,7 @@ while running:
     keys = pygame.key.get_pressed()
 
     inimigo.update(dt)
-    inimigo.draw(screen, cam_x, cam_y)
+    inimigo.draw(screen, cam_x, cam_y, cam_zoom)
 
     if warning != None:
         warning.update(dt)
@@ -178,15 +186,17 @@ while running:
     
     pontos_text = font.render("Pontos: " + str( pontos), False, (255, 255, 255))
     screen.blit(pontos_text, (0, 0))
+    if arma:
+        screen.blit(gun[min(round(gun_frame), 1)], (900,405))
     if game_state == "game":
-        
+
         if fail_cooldown > 0:
             fail_cooldown-=1
         else:
             arma = False
         
         if start <= 0:
-            
+            cam_zoom_targ = 1
             if keys[pygame.K_SPACE] and fail_cooldown <= 0:
                 
                 gun_frame = 0
@@ -222,8 +232,6 @@ while running:
         vidro = pygame.transform.scale(img_break,(1280, 720))
         screen.blit(vidro, (-cam_x, -cam_y))
 
-        screen.blit(blood_sprite, (0, blood_y))
-
         if blood_y < 0:
             blood_y+=blood_vspd
             blood_vspd+=.2
@@ -232,26 +240,25 @@ while running:
             blood_vspd = 0
 
         if game_over_reset_timer <= 0:
-
+            
             if keys[pygame.K_SPACE]:
                 
                 arma = True
                 pontos = 0
-                fase = 1
-                ini(fase)
+                ini(pontos)
                 tema.play()
         else:
             game_over_reset_timer-=1
+
+        screen.blit(blood_sprite, (0, blood_y))
+
     elif game_state == "won":
         if reset_timer > 0:
             reset_timer-=1
         else:
             fase+=1
             nphase.play()
-            ini(fase)
-
-    if arma:
-        screen.blit(gun[min(round(gun_frame), 1)], (900,405))
+            ini(pontos)
     pygame.display.flip()
     
     start-=1
