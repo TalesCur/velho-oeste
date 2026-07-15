@@ -40,6 +40,7 @@ class Inimigo(object.Object):
     def die(self):
         self.current_sprite = 2
         self.vspd = -5
+        self.scale = 1
 
     def shoot(self):
         self.current_sprite = 1

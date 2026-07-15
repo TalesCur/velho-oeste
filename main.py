@@ -7,6 +7,11 @@ pygame.init()
 pygame.mixer.init()
 pygame.font.init()
 
+_bg = pygame.image.load("background.png")
+bg = pygame.transform.scale(_bg, (_bg.get_width()*1.1, _bg.get_height()*1.1))
+
+gun = [pygame.image.load("images/gun_fire_frame2.png"), pygame.image.load("images/gun_fire_frame1.png")]
+gun_frame = 0
 font = pygame.font.SysFont("Comic Sans MS", 50)
 
 # Initiating sounds
@@ -67,6 +72,8 @@ inimigo_timer = random.randint(30, 60)
 global pontos
 pontos = 10
 
+global arma
+arma = False
 
 running = True
 
@@ -83,6 +90,9 @@ def ini(f):
 
     global start
     start = round(random.randint(120, 180) / (1+pontos*.02))
+
+    global arma
+    arma = False
 
     global blood_y
     blood_y = -1280
@@ -109,7 +119,7 @@ def ini(f):
     reset_timer = 120
 
     global inimigo_timer
-    inimigo_timer = random.randint(30, 60) / (1+pontos*.02)
+    inimigo_timer = random.randint(60, 100) / (1+pontos*.02)
 
 ini(fase)
 
@@ -122,6 +132,9 @@ while running:
 
     screen.fill((0, 0, 0))
 
+    gun_frame+=.1
+
+    screen.blit(bg, (round(0+cam_x), round(-100+cam_y)))
     cam_x = random.uniform(-shake, shake)
     cam_y = random.uniform(-shake, shake)
     shake *= .9
@@ -132,7 +145,7 @@ while running:
 
             ready_sound.play()
             warning = Warning(0)
-        elif start == 20:
+        elif start == 10:
             
             if random.randint(0, 1) == 1:
                 
@@ -169,21 +182,25 @@ while running:
         
         if fail_cooldown > 0:
             fail_cooldown-=1
-
+        else:
+            arma = False
         
         if start <= 0:
             
             if keys[pygame.K_SPACE] and fail_cooldown <= 0:
                 
+                gun_frame = 0
                 inimigo.die()
                 game_state = "won"
                 shake = 10
                 pontos += 1
                 shot.play()
+                arma = True
             else:
 
                 if inimigo_timer <= 0:
                     
+    
                     inimigo.shoot()
                     game_state = "game_over"
                     game_over_reset_timer = 120
@@ -196,8 +213,10 @@ while running:
 
             if keys[pygame.K_SPACE] and fail_cooldown <= 0:
 
+                gun_frame = 1
                 gun_fail.play()
                 fail_cooldown = 100
+                arma = True
     elif game_state == "game_over":
 
         vidro = pygame.transform.scale(img_break,(1280, 720))
@@ -215,7 +234,8 @@ while running:
         if game_over_reset_timer <= 0:
 
             if keys[pygame.K_SPACE]:
-
+                
+                arma = True
                 pontos = 0
                 fase = 1
                 ini(fase)
@@ -229,6 +249,9 @@ while running:
             fase+=1
             nphase.play()
             ini(fase)
+
+    if arma:
+        screen.blit(gun[min(round(gun_frame), 1)], (900,405))
     pygame.display.flip()
     
     start-=1

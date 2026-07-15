@@ -42,5 +42,5 @@ class Object:
 
         if self.scale > 0:
 
-            sprite = pygame.transform.scale(self.sprites[self.current_sprite],(self.get_width() * self.scale, self.get_height() * self.scale))
+            sprite = pygame.transform.scale(self.sprites[self.current_sprite],(round(self.get_width() * self.scale), round(self.get_height() * self.scale)))
             screen.blit(sprite, (self.x - self.get_width()*self.scale / 2, self.y - self.get_height()*self.scale / 2))
