@@ -16,8 +16,10 @@ gun_frame = 0
 font = pygame.font.SysFont("Comic Sans MS", 50)
 
 # Initiating sounds
-tema = pygame.mixer.Sound("sounds/main_theme.mp3")
-tema.set_volume(1.0)
+tema = pygame.mixer.music.load("sounds/main_theme.mp3")
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(1.0)
+
 shot = pygame.mixer.Sound("sounds/shot.wav")
 shot.set_volume(0.8)
 ready_sound = pygame.mixer.Sound("sounds/ready_sound.wav")
@@ -87,12 +89,10 @@ won = False
 global reset_timer
 reset_timer = 120
 
-tema.play(-1)
-
 def ini(f):
 
     global start
-    start = round(random.randint(120, 180) / (1+f*.25))
+    start = round(random.randint(120, 180) / (1+f*.2))
 
     global arma
     arma = False
@@ -122,7 +122,7 @@ def ini(f):
     reset_timer = 120
 
     global inimigo_timer
-    inimigo_timer = random.randint(60, 100) / (1+f*.15)
+    inimigo_timer = random.randint(60, 100) / (1+f*.10)
 
 ini(pontos)
 
@@ -160,7 +160,7 @@ while running:
                 ready_sound.play()
                 warning = Warning(1)
                 _set = True
-                start = round(random.randint(50, 100) / (1+pontos*.1))
+                start = round(random.randint(50, 100) / (1+pontos*.05))
 
             else:
                 
@@ -216,7 +216,7 @@ while running:
                     game_over_reset_timer = 120
                     shake = 10
                     shot.play()
-                    tema.stop()
+                    pygame.mixer.music.stop()
                 else:
                     inimigo_timer -= 1
         else:
@@ -246,7 +246,7 @@ while running:
                 arma = True
                 pontos = 0
                 ini(pontos)
-                tema.play()
+                pygame.mixer.music.play()
         else:
             game_over_reset_timer-=1
 
