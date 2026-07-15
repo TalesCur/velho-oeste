@@ -87,7 +87,7 @@ won = False
 global reset_timer
 reset_timer = 120
 
-tema.play()
+tema.play(-1)
 
 def ini(f):
 
