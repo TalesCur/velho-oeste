@@ -246,7 +246,7 @@ while running:
                 arma = True
                 pontos = 0
                 ini(pontos)
-                pygame.mixer.music.play()
+                pygame.mixer.music.play(-1)
         else:
             game_over_reset_timer-=1
 
